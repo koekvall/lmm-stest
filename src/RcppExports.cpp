@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // loglik_rcpp
 Rcpp::List loglik_rcpp(arma::vec y, const arma::mat X, const arma::mat Z, const arma::vec beta, const double sigma, const arma::vec lambda, const arma::uvec id, const uint diffs);
-RcppExport SEXP _lmmSTest_loglik_rcpp(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP lambdaSEXP, SEXP idSEXP, SEXP diffsSEXP) {
+RcppExport SEXP _lmmstest_loglik_rcpp(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP lambdaSEXP, SEXP idSEXP, SEXP diffsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,11 +26,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lmmSTest_loglik_rcpp", (DL_FUNC) &_lmmSTest_loglik_rcpp, 8},
+    {"_lmmstest_loglik_rcpp", (DL_FUNC) &_lmmstest_loglik_rcpp, 8},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_lmmSTest(DllInfo *dll) {
+RcppExport void R_init_lmmstest(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
