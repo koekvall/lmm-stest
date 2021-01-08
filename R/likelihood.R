@@ -1,5 +1,4 @@
-loglik <- function(y, X, Z, Beta, sigma, lambda, id, diffs)
-{
+log_lik <- function(y, X, Z, Beta, sigma, lambda, id, diffs){
   stopifnot(is.atomic(y), is.null(dim(y)))
   n <- length(y)
   stopifnot(is.matrix(X), nrow(X) == n)
@@ -16,5 +15,5 @@ loglik <- function(y, X, Z, Beta, sigma, lambda, id, diffs)
   stopifnot(is.atomic(id), length(id) == q, all(sort(unique(id)) == 1:d))
   stopifnot(diffs %in% 0:2)
 
-  loglik_rcpp(y, X, Z, Beta, sigma, lambda, id, diffs)
+  log_lik_rcpp(y, X, Z, Beta, sigma, lambda, id, diffs)
 }

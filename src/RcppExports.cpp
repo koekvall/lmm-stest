@@ -6,9 +6,9 @@
 
 using namespace Rcpp;
 
-// loglik_rcpp
-Rcpp::List loglik_rcpp(arma::vec y, const arma::mat X, const arma::mat Z, const arma::vec beta, const double sigma, const arma::vec lambda, const arma::uvec id, const uint diffs);
-RcppExport SEXP _lmmstest_loglik_rcpp(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP lambdaSEXP, SEXP idSEXP, SEXP diffsSEXP) {
+// log_lik_rcpp
+Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X, const arma::mat Z, const arma::vec beta, const double sigma, const arma::vec lambda, const arma::uvec id, const uint diffs);
+RcppExport SEXP _lmmstest_log_lik_rcpp(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP lambdaSEXP, SEXP idSEXP, SEXP diffsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,13 +20,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< const arma::uvec >::type id(idSEXP);
     Rcpp::traits::input_parameter< const uint >::type diffs(diffsSEXP);
-    rcpp_result_gen = Rcpp::wrap(loglik_rcpp(y, X, Z, beta, sigma, lambda, id, diffs));
+    rcpp_result_gen = Rcpp::wrap(log_lik_rcpp(y, X, Z, beta, sigma, lambda, id, diffs));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lmmstest_loglik_rcpp", (DL_FUNC) &_lmmstest_loglik_rcpp, 8},
+    {"_lmmstest_log_lik_rcpp", (DL_FUNC) &_lmmstest_log_lik_rcpp, 8},
     {NULL, NULL, 0}
 };
 

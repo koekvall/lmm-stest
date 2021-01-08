@@ -1,7 +1,7 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-Rcpp::List loglik_rcpp(arma::vec y, const arma::mat X,
+Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
   const arma::mat Z, const arma::vec beta, const double sigma,
   const arma::vec lambda, const arma::uvec id, const uint diffs)
 {
@@ -102,6 +102,8 @@ Rcpp::List loglik_rcpp(arma::vec y, const arma::mat X,
   } else{
     // Not supported yet
   }
+  // Force symmetry
+  I = 0.5 * (I + I.t());
   return Rcpp::List::create(Rcpp::Named("loglik") = val,
                            Rcpp::Named("sscore") = g,
                            Rcpp::Named("Inf") = I);
