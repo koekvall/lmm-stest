@@ -3,7 +3,7 @@
 // [[Rcpp::export]]
 Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
   const arma::mat Z, const arma::vec beta, const double sigma,
-  const arma::vec lambda, const arma::uvec id, const uint diffs)
+  const arma::vec lambda, const arma::uvec lam_idx, const uint diffs)
 {
   // Raw Y not used
   y -= X * beta;
@@ -11,12 +11,12 @@ Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
   // Define constants
   const uint n = y.n_elem;
   const uint p = X.n_cols;
-  const uint q = id.n_elem;
+  const uint q = lam_idx.n_elem;
   const uint dim = std::min(n, q);
   const uint d = lambda.n_elem;
   arma::vec Lam(q);
   for(size_t jj = 0; jj < q; jj ++){
-    Lam(jj) = lambda(id(jj) - 1); // Indexing differ in R and C
+    Lam(jj) = lambda(lam_idx(jj) - 1); // Indexing differ in R and C
   }
   double val = 0;
   arma::vec g(p + d + 1, arma::fill::zeros);
@@ -67,7 +67,7 @@ Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
 
       // lambda scaled (by 1 / lambda) score
       for(size_t jj = 0; jj < d; jj++){
-        arma::uvec idx = arma::find(id == jj + 1);
+        arma::uvec idx = arma::find(lam_idx == jj + 1);
         g(p + 1 + jj) = -arma::trace(ZtSIZ.submat(idx, idx));
         g(p + 1 + jj) += arma::accu(arma::square(ZtSIy.elem(idx)));
       }
@@ -86,15 +86,15 @@ Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
 
       // Information for lambda
       for(size_t jj = 0; jj < d; jj++){
-        arma::uvec idx = arma::find(id == jj + 1);
+        arma::uvec idx_j = arma::find(lam_idx == jj + 1);
         // Cross with sigma
-        I(p + 1 + jj, p) = arma::accu(arma::square(SIZ.elem(idx)));
+        I(p + 1 + jj, p) = 2.0 * arma::accu(arma::square(SIZ.cols(idx_j)));
         I(p, p + 1 + jj) = I(p + 1 + jj, p);
         // Within lambda
         for(size_t kk = 0; kk <= jj; kk ++){
-          arma::uvec idx2 = arma::find(id == kk + 1);
-          I(p + 1 + jj, p + 1 + kk) = arma::accu(arma::square(ZtSIZ.submat(idx,
-          idx2)));
+          arma::uvec idx_k = arma::find(lam_idx == kk + 1);
+          I(p + 1 + jj, p + 1 + kk) =
+            2.0 * arma::accu(arma::square(ZtSIZ.submat(idx_j, idx_k)));
           I(p + 1 + kk, p + 1 + jj) = I(p + 1 + jj, p + 1 + kk);
         }
       }
@@ -105,6 +105,6 @@ Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
   // Force symmetry
   I = 0.5 * (I + I.t());
   return Rcpp::List::create(Rcpp::Named("loglik") = val,
-                           Rcpp::Named("sscore") = g,
-                           Rcpp::Named("Inf") = I);
+                           Rcpp::Named("scaled_score") = g,
+                           Rcpp::Named("scaled_inf") = I);
 }
