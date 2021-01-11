@@ -1,3 +1,24 @@
+#' Compute the log-likelihood, a scaled score (gradient), and the
+#' covariance matrix of that scaled score (scaled information).
+#'
+#' @param y a vector of observed responses
+#' @param X a matrix of predictors whose i:th row corresponds to the i:th
+#' element in y
+#' @param Z a design matrix for the random effects whose i:th row corresponds
+#' to the i:th element in y
+#' @param Beta a vector of regression coefficients of length ncol(X)
+#' @param sigma the standard deviation of the error term
+#' @param lambda a vector of scale parameters (standard deviations) of the
+#' random effects
+#' @param lam_idx a vector of length ncol(Z) whose j:th element indicates
+#' which element of lambda scales the j:th random effect
+#' @param diffs an integer indicating whether to compute only the
+#' log-likelihood (0), the log-likelihood and scaled score (1), or
+#' the log-likelihood, scaled score, and scaled information (2)
+#' 
+#' @return a list with log-likelihood ("loglik"), scaled score ("scaled_score")
+#' and scaled information ("scaled_inf")
+#' @export
 log_lik <- function(y, X, Z, Beta, sigma, lambda, lam_idx, diffs){
   stopifnot(is.atomic(y), is.null(dim(y)))
   n <- length(y)
@@ -31,5 +52,5 @@ fish_inf <- function(y, X, Z, Beta, sigma, lambda, lam_idx)
   out <- log_lik(y = y, X = X, Z = Z, Beta = Beta, sigma = sigma, lambda =
     lambda, lam_idx = lam_idx, diffs = 2)
   scale_vec <- c(rep(1, length(Beta)), sigma, lambda)
-  scale_vec * out[[3]] * scale_vec
+  diag(scale_vec, length(scale_vec)) %*% out[[3]] %*% diag(scale_vec, length(scale_vec))
 }

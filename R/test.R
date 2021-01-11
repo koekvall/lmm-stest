@@ -1,3 +1,25 @@
+#' Compute (modified) score test statistic in a linear mixed model
+#'
+#' @param y a vector of observed responses
+#' @param X a matrix of predictors whose i:th row corresponds to the i:th
+#' element in y
+#' @param Z a design matrix for the random effects whose i:th row corresponds
+#' to the i:th element in y
+#' @param Beta a vector of regression coefficients of length ncol(X)
+#' @param sigma the standard deviation of the error term
+#' @param lambda a vector of scale parameters (standard deviations) of the
+#' random effects
+#' @param lam_idx a vector of length ncol(Z) whose j:th element indicates
+#' which element of lambda scales the j:th random effect
+#' @param test_idx a vector of integers indicating for which elements of
+#' theta = c(Beta, sigma, lambda) the test statistic is to be computed
+#' 
+#' @return a vector with test-statistic ("chi_sq"), degrees of freedom ("df"),
+#' and p-value ("p_val")
+#' @useDynLib lmmstest, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
+#' @importFrom Rcpp evalCpp
+#' @export
 score_test <- function(y, X, Z, Beta, sigma, lambda, lam_idx, test_idx){
   components <- log_lik(y = y, X = X, Z = Z, Beta = Beta, sigma = sigma,
                         lambda = lambda, lam_idx = lam_idx, diffs = 2)
@@ -9,6 +31,6 @@ score_test <- function(y, X, Z, Beta, sigma, lambda, lam_idx, test_idx){
   I <- components[[3]][test_idx, test_idx]
   test_stat <- sum(s * qr.solve(I, s))
   df <- length(test_idx)
-  p_val <- pchisq(q = test_stat, df = df, lower.tail = FALSE)
+  p_val <- stats::pchisq(q = test_stat, df = df, lower.tail = FALSE)
   c("chi_sq" = test_stat, "df" = df, "p_val" = p_val)
 }

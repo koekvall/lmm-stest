@@ -5,9 +5,11 @@ Version: 1.0
 Date: 2021-01-05
 Author: Karl Oskar Ekvall
 Maintainer: Karl Oskar Ekvall <k.o.ekvall@gmail.com>
-Description: Implements the score test standardized by expected Fisher
-  information for parameters in a linear mixed model with independent
-  random effects. Partcularly useful for scale variance parameters near zero.
-License: MIT
+Description: Implements the (modified) score test standardized by expected
+  Fisher information for parameters in a linear mixed model with independent
+  random effects. Partcularly useful for scale or variance parameters near zero.
+License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.5)
 LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.1.1
+Encoding: UTF-8
