@@ -1,23 +1,38 @@
 #' Compute the log-likelihood, a scaled score (gradient), and the
 #' covariance matrix of that scaled score (scaled information).
 #'
+#' The order of parameters in the score function is as in c(Beta, sigma,
+#' lambda). The elements of the score corresponding to scale parameters (sigma,
+#' lambda) are scaled by (1 / scale parameter) (see details).
+#'
 #' @param y a vector of observed responses
 #' @param X a matrix of predictors whose i:th row corresponds to the i:th
-#' element in y
+#'   element in y
 #' @param Z a design matrix for the random effects whose i:th row corresponds
-#' to the i:th element in y
+#'   to the i:th element in y
 #' @param Beta a vector of regression coefficients of length ncol(X)
 #' @param sigma the standard deviation of the error term
 #' @param lambda a vector of scale parameters (standard deviations) of the
-#' random effects
+#'   random effects
 #' @param lam_idx a vector of length ncol(Z) whose j:th element indicates
-#' which element of lambda scales the j:th random effect
+#'   which element of lambda scales the j:th random effect
 #' @param diffs an integer indicating whether to compute only the
-#' log-likelihood (0), the log-likelihood and scaled score (1), or
-#' the log-likelihood, scaled score, and scaled information (2)
-#' 
+#'   log-likelihood (0), the log-likelihood and scaled score (1), or
+#'   the log-likelihood, scaled score, and scaled information (2)
+#'
 #' @return a list with log-likelihood ("loglik"), scaled score ("scaled_score")
-#' and scaled information ("scaled_inf")
+#'   and scaled information ("scaled_inf")
+#'
+#' @details The scaling is done for scale parameters only. For example,
+#'   the returned scaled score for sigma is the usual score times (1 / sigma).
+#'   The regular score can be obtained by loglik(..)[[2]] * c(rep(1,
+#'   length(Beta)), sigma, lambda). This calculation is implemented in the
+#'   non-exported function 'score'. Similarly, the regular expected Fisher
+#'   information can be obtained as diag(c(rep(1, length(Beta)), sigma, lambda))
+#'   \%*\% loglik(...)[[3]] \%*\% diag(c(rep(1, length(Beta)), sigma, lambda)),
+#'   and this calculation is implemented in the non-exported function
+#'   'fish_inf'.
+#'
 #' @export
 log_lik <- function(y, X, Z, Beta, sigma, lambda, lam_idx, diffs){
   stopifnot(is.atomic(y), is.null(dim(y)))
@@ -52,5 +67,6 @@ fish_inf <- function(y, X, Z, Beta, sigma, lambda, lam_idx)
   out <- log_lik(y = y, X = X, Z = Z, Beta = Beta, sigma = sigma, lambda =
     lambda, lam_idx = lam_idx, diffs = 2)
   scale_vec <- c(rep(1, length(Beta)), sigma, lambda)
-  diag(scale_vec, length(scale_vec)) %*% out[[3]] %*% diag(scale_vec, length(scale_vec))
+  diag(scale_vec, length(scale_vec)) %*% out[[3]] %*% diag(scale_vec,
+  length(scale_vec))
 }

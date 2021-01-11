@@ -33,5 +33,12 @@ a vector with test-statistic ("chi_sq"), degrees of freedom ("df"),
 and p-value ("p_val")
 }
 \description{
-Compute (modified) score test statistic in a linear mixed model
+The statistic is based on a modified score function that
+replaces the first partial derivative of the log-likelihood with
+respect to a standard deviation parameter by the second partial
+derivative at points where the former is almost surely equal to zero,
+which happens if and only if the standard deviation parameter is equal
+to zero. When no standard deviation parameters are zero under the null
+hypothesis, the test statistic is the usual score test statistic
+standardized by expected Fisher information.
 }

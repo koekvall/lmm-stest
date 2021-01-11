@@ -1,5 +1,10 @@
 #' Compute (modified) score test statistic in a linear mixed model
 #'
+#' The statistic is based on a modified score function that, unlike the usual
+#' score function, has a full rank covariance matrix on the whole parameter
+#' space. In particular, the test is reliable at and near the boundary of the
+#' parameter space where some scale parameters (sigma, lambda) are near zero.
+#'
 #' @param y a vector of observed responses
 #' @param X a matrix of predictors whose i:th row corresponds to the i:th
 #' element in y
@@ -13,9 +18,17 @@
 #' which element of lambda scales the j:th random effect
 #' @param test_idx a vector of integers indicating for which elements of
 #' theta = c(Beta, sigma, lambda) the test statistic is to be computed
-#' 
+#'
 #' @return a vector with test-statistic ("chi_sq"), degrees of freedom ("df"),
 #' and p-value ("p_val")
+#'
+#' @details The modified score replaces the first partial derivative of the
+#'   log-likelihood with respect to a standard deviation parameter by the second
+#'   partial derivative at points where the former is almost surely equal to
+#'   zero, which happens if and only if the standard deviation parameter is
+#'   equal to zero. When no standard deviation parameters are zero under the
+#'   null hypothesis, the test statistic is the usual score test statistic
+#'   standardized by expected Fisher information.
 #' @useDynLib lmmstest, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom Rcpp evalCpp

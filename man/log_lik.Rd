@@ -35,6 +35,17 @@ a list with log-likelihood ("loglik"), scaled score ("scaled_score")
 and scaled information ("scaled_inf")
 }
 \description{
-Compute the log-likelihood, a scaled score (gradient), and the
-covariance matrix of that scaled score (scaled information).
+The order of parameters in the score function is as in c(Beta, sigma, lambda).
+The elements of the score corresponding to scale parameters (sigma, lambda)
+are scaled by (1 / scale parameter) (see details).
+}
+\details{
+for example, the scaled score for sigma
+is the score for sigma times (1 / sigma). The regular score can be obtained
+by loglik(..)[[2]] * c(rep(1, length(Beta)), sigma, lambda). This calculation
+is implemented in the non-exported function 'score'. Similarly,
+the regular expected Fisher information can be obtained as
+diag(c(rep(1, length(Beta)), sigma, lambda)) \%*\% loglik(...)[[3]] \%*\%
+diag(c(rep(1, length(Beta)), sigma, lambda)), and this calculation is
+implemented in the non-exported function 'fish_inf'.
 }
