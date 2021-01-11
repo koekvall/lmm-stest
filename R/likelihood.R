@@ -1,30 +1,46 @@
-#' Compute the log-likelihood, a scaled score (gradient), and the
-#' covariance matrix of that scaled score (scaled information).
+#' Compute log-likelihood, scaled score, and scaled information
 #'
+#' @description{
+#' Computed quantities assume a linear mixed model with independent random
+#' random effects, parameterized in terms of regression coefficients and
+#' standard deviations of the random effects and the error term (see details).
+#' 
 #' The order of parameters in the score function is as in c(Beta, sigma,
-#' lambda). The elements of the score corresponding to scale parameters (sigma,
+#' lambda). 
+#' 
+#' The elements of the score corresponding to scale parameters (sigma,
 #' lambda) are scaled by (1 / scale parameter) (see details).
-#'
-#' @param y a vector of observed responses
-#' @param X a matrix of predictors whose i:th row corresponds to the i:th
-#'   element in y
-#' @param Z a design matrix for the random effects whose i:th row corresponds
-#'   to the i:th element in y
-#' @param Beta a vector of regression coefficients of length ncol(X)
-#' @param sigma the standard deviation of the error term
-#' @param lambda a vector of scale parameters (standard deviations) of the
-#'   random effects
-#' @param lam_idx a vector of length ncol(Z) whose j:th element indicates
-#'   which element of lambda scales the j:th random effect
-#' @param diffs an integer indicating whether to compute only the
+#' }
+#' @param y A vector of observed responses.
+#' @param X A matrix of predictors whose i:th row corresponds to the i:th
+#'   element in y.
+#' @param Z A design matrix for the random effects whose i:th row corresponds
+#'   to the i:th element in y.
+#' @param Beta A vector of regression coefficients of length ncol(X)
+#' @param sigma The standard deviation of the error term.
+#' @param lambda A vector of scale parameters (standard deviations) of the
+#'   random effects.
+#' @param lam_idx A vector of length ncol(Z) whose j:th element indicates
+#'   which element of lambda scales the j:th random effect.
+#' @param diffs An integer indicating whether to compute only the
 #'   log-likelihood (0), the log-likelihood and scaled score (1), or
-#'   the log-likelihood, scaled score, and scaled information (2)
+#'   the log-likelihood, scaled score, and scaled information (2).
 #'
-#' @return a list with log-likelihood ("loglik"), scaled score ("scaled_score")
-#'   and scaled information ("scaled_inf")
+#' @return A list with log-likelihood ("loglik"), scaled score ("scaled_score")
+#'   and scaled information ("scaled_inf").
 #'
-#' @details The scaling is done for scale parameters only. For example,
-#'   the returned scaled score for sigma is the usual score times (1 / sigma).
+#' @details{
+#'   The linear mixed model assumed is y = X \%*\% Beta + Z \%*\% u + e,
+#'   where the vector of random effects u is from a multivariate normal
+#'   distribution with mean zero and diagonal covariance matrix. The j:th
+#'   diagonal element of that covariance matrix -- the variance of the j:th
+#'   random effect -- is equal to lambda(lam_idx[j])^2.
+#'  
+#'   The elements of e are independent draws from a normal distribution
+#'   with mean 0 and variance sigma^2.
+#'   
+#'   The scaling of the score is done for scale parameters only. For example,
+#'   the scaled score for sigma is the usual score times (1 / sigma).
 #'   The regular score can be obtained by loglik(..)[[2]] * c(rep(1,
 #'   length(Beta)), sigma, lambda). This calculation is implemented in the
 #'   non-exported function 'score'. Similarly, the regular expected Fisher
@@ -32,6 +48,12 @@
 #'   \%*\% loglik(...)[[3]] \%*\% diag(c(rep(1, length(Beta)), sigma, lambda)),
 #'   and this calculation is implemented in the non-exported function
 #'   'fish_inf'.
+#'   
+#'   When one or more scale parameter are zero, the corresponding elements
+#'   of the usual score function are identically zero regardless of the data,
+#'   but the scaled score function, which can be defined as a limit, is still
+#'   useful. In particular, it has a positive definite covariance matrix.
+#'   }
 #'
 #' @export
 log_lik <- function(y, X, Z, Beta, sigma, lambda, lam_idx, diffs){

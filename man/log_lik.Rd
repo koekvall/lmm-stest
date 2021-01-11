@@ -2,50 +2,74 @@
 % Please edit documentation in R/likelihood.R
 \name{log_lik}
 \alias{log_lik}
-\title{Compute the log-likelihood, a scaled score (gradient), and the
-covariance matrix of that scaled score (scaled information).}
+\title{Compute log-likelihood, scaled score, and scaled information}
 \usage{
 log_lik(y, X, Z, Beta, sigma, lambda, lam_idx, diffs)
 }
 \arguments{
-\item{y}{a vector of observed responses}
+\item{y}{A vector of observed responses.}
 
-\item{X}{a matrix of predictors whose i:th row corresponds to the i:th
-element in y}
+\item{X}{A matrix of predictors whose i:th row corresponds to the i:th
+element in y.}
 
-\item{Z}{a design matrix for the random effects whose i:th row corresponds
-to the i:th element in y}
+\item{Z}{A design matrix for the random effects whose i:th row corresponds
+to the i:th element in y.}
 
-\item{Beta}{a vector of regression coefficients of length ncol(X)}
+\item{Beta}{A vector of regression coefficients of length ncol(X)}
 
-\item{sigma}{the standard deviation of the error term}
+\item{sigma}{The standard deviation of the error term.}
 
-\item{lambda}{a vector of scale parameters (standard deviations) of the
-random effects}
+\item{lambda}{A vector of scale parameters (standard deviations) of the
+random effects.}
 
-\item{lam_idx}{a vector of length ncol(Z) whose j:th element indicates
-which element of lambda scales the j:th random effect}
+\item{lam_idx}{A vector of length ncol(Z) whose j:th element indicates
+which element of lambda scales the j:th random effect.}
 
-\item{diffs}{an integer indicating whether to compute only the
+\item{diffs}{An integer indicating whether to compute only the
 log-likelihood (0), the log-likelihood and scaled score (1), or
-the log-likelihood, scaled score, and scaled information (2)}
+the log-likelihood, scaled score, and scaled information (2).}
 }
 \value{
-a list with log-likelihood ("loglik"), scaled score ("scaled_score")
-and scaled information ("scaled_inf")
+A list with log-likelihood ("loglik"), scaled score ("scaled_score")
+  and scaled information ("scaled_inf").
 }
 \description{
-The order of parameters in the score function is as in c(Beta, sigma, lambda).
-The elements of the score corresponding to scale parameters (sigma, lambda)
-are scaled by (1 / scale parameter) (see details).
+{
+Computed quantities assume a linear mixed model with independent random
+random effects, parameterized in terms of regression coefficients and
+standard deviations of the random effects and the error term (see details).
+
+The order of parameters in the score function is as in c(Beta, sigma,
+lambda). 
+
+The elements of the score corresponding to scale parameters (sigma,
+lambda) are scaled by (1 / scale parameter) (see details).
+}
 }
 \details{
-for example, the scaled score for sigma
-is the score for sigma times (1 / sigma). The regular score can be obtained
-by loglik(..)[[2]] * c(rep(1, length(Beta)), sigma, lambda). This calculation
-is implemented in the non-exported function 'score'. Similarly,
-the regular expected Fisher information can be obtained as
-diag(c(rep(1, length(Beta)), sigma, lambda)) \%*\% loglik(...)[[3]] \%*\%
-diag(c(rep(1, length(Beta)), sigma, lambda)), and this calculation is
-implemented in the non-exported function 'fish_inf'.
+{
+  The linear mixed model assumed is y = X \%*\% Beta + Z \%*\% u + e,
+  where the vector of random effects u is from a multivariate normal
+  distribution with mean zero and diagonal covariance matrix. The j:th
+  diagonal element of that covariance matrix -- the variance of the j:th
+  random effect -- is equal to lambda(lam_idx[j])^2.
+ 
+  The elements of e are independent draws from a normal distribution
+  with mean 0 and variance sigma^2.
+  
+  The scaling of the score is done for scale parameters only. For example,
+  the scaled score for sigma is the usual score times (1 / sigma).
+  The regular score can be obtained by loglik(..)[[2]] * c(rep(1,
+  length(Beta)), sigma, lambda). This calculation is implemented in the
+  non-exported function 'score'. Similarly, the regular expected Fisher
+  information can be obtained as diag(c(rep(1, length(Beta)), sigma, lambda))
+  \%*\% loglik(...)[[3]] \%*\% diag(c(rep(1, length(Beta)), sigma, lambda)),
+  and this calculation is implemented in the non-exported function
+  'fish_inf'.
+  
+  When one or more scale parameter are zero, the corresponding elements
+  of the usual score function are identically zero regardless of the data,
+  but the scaled score function, which can be defined as a limit, is still
+  useful. In particular, it has a positive definite covariance matrix.
+  }
 }

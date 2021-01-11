@@ -1,34 +1,52 @@
-#' Compute (modified) score test statistic in a linear mixed model
+#' Compute the (modified) score test statistic
 #'
-#' The statistic is based on a modified score function that, unlike the usual
-#' score function, has a full rank covariance matrix on the whole parameter
-#' space. In particular, the test is reliable at and near the boundary of the
-#' parameter space where some scale parameters (sigma, lambda) are near zero.
+#' @description{
+#'   The statistic is based on a modified score function that, unlike the usual
+#'   score function, has a full rank covariance matrix on the whole parameter
+#'   space. See ?log_lik for details on the parameterization.
+#'   
+#'   The test is reliable at and near the boundary of the
+#'   parameter space where some scale parameters (sigma, lambda) are near zero.
+#' }
 #'
-#' @param y a vector of observed responses
-#' @param X a matrix of predictors whose i:th row corresponds to the i:th
-#' element in y
-#' @param Z a design matrix for the random effects whose i:th row corresponds
-#' to the i:th element in y
-#' @param Beta a vector of regression coefficients of length ncol(X)
-#' @param sigma the standard deviation of the error term
-#' @param lambda a vector of scale parameters (standard deviations) of the
-#' random effects
-#' @param lam_idx a vector of length ncol(Z) whose j:th element indicates
-#' which element of lambda scales the j:th random effect
-#' @param test_idx a vector of integers indicating for which elements of
-#' theta = c(Beta, sigma, lambda) the test statistic is to be computed
+#' @param y A vector of observed responses.
+#' @param X A matrix of predictors whose i:th row corresponds to the i:th
+#'   element in y.
+#' @param Z A design matrix for the random effects whose i:th row corresponds
+#'   to the i:th element in y.
+#' @param Beta A vector of regression coefficients of length ncol(X).
+#' @param sigma The standard deviation of the error term.
+#' @param lambda A vector of scale parameters (standard deviations) of the
+#'   random effects.
+#' @param lam_idx A vector of length ncol(Z) whose j:th element indicates
+#'   which element of lambda scales the j:th random effect.
+#' @param test_idx A vector of integers indicating for which elements of
+#'   theta = c(Beta, sigma, lambda) the test statistic is to be computed.
 #'
-#' @return a vector with test-statistic ("chi_sq"), degrees of freedom ("df"),
-#' and p-value ("p_val")
+#' @return A vector with test statistic ("chi_sq"), degrees of freedom ("df"),
+#' and p-value ("p_val").
 #'
-#' @details The modified score replaces the first partial derivative of the
-#'   log-likelihood with respect to a standard deviation parameter by the second
-#'   partial derivative at points where the former is almost surely equal to
-#'   zero, which happens if and only if the standard deviation parameter is
-#'   equal to zero. When no standard deviation parameters are zero under the
+#' @details{
+#'   The linear mixed model assumed is y = X \%*\% Beta + Z \%*\% u + e,
+#'   where the vector of random effects u is from a multivariate normal
+#'   distribution with mean zero and diagonal covariance matrix. The j:th
+#'   diagonal element of that covariance matrix -- the variance of the j:th
+#'   random effect -- is equal to lambda(lam_idx[j])^2.
+#'  
+#'   The elements of e are independent draws from a normal distribution
+#'   with mean 0 and variance sigma^2.
+#'   
+#'   The test statistic is computed for theta[test_idx], where theta = c(Beta,
+#'   sigma, lambda). Elements of theta not restricted under the null hypothesis
+#'   should ideally be evaluated at their maximum likelihood estimates under the
+#'   null hypothesis, but the asymptotic distribution of the test statistic is
+#'   typically correct also if other square root n-consistent estimators are 
+#'   plugged in.
+#'   
+#'   When no standard deviation parameters are zero under the
 #'   null hypothesis, the test statistic is the usual score test statistic
 #'   standardized by expected Fisher information.
+#' }
 #' @useDynLib lmmstest, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom Rcpp evalCpp
