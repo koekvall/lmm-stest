@@ -16,9 +16,9 @@
 #'   element in y.
 #' @param Z A design matrix for the random effects whose i:th row corresponds
 #'   to the i:th element in y.
-#' @param Beta A vector of regression coefficients of length ncol(X)
+#' @param Beta A vector of regression coefficients of length ncol(X).
 #' @param sigma The standard deviation of the error term.
-#' @param lambda A vector of scale parameters (standard deviations) of the
+#' @param lambda A vector of scale parameters (standard deviations) for the
 #'   random effects.
 #' @param lam_idx A vector of length ncol(Z) whose j:th element indicates
 #'   which element of lambda scales the j:th random effect.
@@ -34,7 +34,7 @@
 #'   where the vector of random effects u is from a multivariate normal
 #'   distribution with mean zero and diagonal covariance matrix. The j:th
 #'   diagonal element of that covariance matrix -- the variance of the j:th
-#'   random effect -- is equal to lambda(lam_idx[j])^2.
+#'   random effect -- is equal to lambda[lam_idx[j]]^2.
 #'  
 #'   The elements of e are independent draws from a normal distribution
 #'   with mean 0 and variance sigma^2.

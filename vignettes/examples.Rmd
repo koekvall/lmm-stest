@@ -1,0 +1,137 @@
+---
+title: "Modified Score Test for Linear Mixed Models"
+author: "Karl Oskar Ekvall"
+output: pdf_document
+vignette: >
+  %\VignetteIndexEntry{Modified Score Test for Linear Mixed Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Installation
+
+The package can be installed from GitHub, using devtools.
+
+```{r}
+# devtools::install_github("koekvall/lmm-stest")
+library(lmmstest)
+```
+
+
+# Setting
+
+Suppose a vector of responses $Y\in \mathbb{R}^n$, matrix of predictors $X\in
+\mathbb{R}^{n\times p}$, and design matrix $Z \in \mathbb{R}^{n\times q}$
+satisfy, for some $\beta \in \mathbb{R}^p$,
+$$
+  Y = X\beta + ZU + E,
+$$
+where $U = [U_1, \dots, U_q]^T$ is a multivariate normal vector of random
+effects with mean 0 and $E = [E_1, \dots, E_n]^T$ is multivariate normal with
+mean zero and covariance matrix $\sigma^2 I_n$, independent of $U$. Assume also
+the elements of $U$ are independent and that, for every $j \in \{1, \dots, q\}$,
+there is a $k \in \{1, \dots, d\}$ such that $\mathrm{var}(U_j) = \lambda_k^2$,
+$\lambda = [\lambda_1, \dots, \lambda_d]^T$. Thus, the elements of $\lambda$ are
+standard deviations of the random effects. Several random effects can have the
+same variance, in which case $d < q$, or each can have their own variance and,
+then, $d = q$.
+
+# Motivation
+
+Many popular tests perform poorly when one or more of the scale parameters
+$(\sigma, \lambda)$ are near or at zero. The modified score test statistic,
+which replaces first derivatives of the log-likelihood by second when the former
+are identically zero, is an exception. The modified score test statistic is
+equal to the score test statistic standardized by expected Fisher information
+when no scale parameters are identically zero, and can be obtained as the limit
+of that test statistic otherwise.
+
+# Example
+
+Suppose that for $i = 1, \dots, N$ and $t = 1, \dots, T$,
+$$
+  Y_{i, t} = \beta_1 + \beta_2 X_{i, t} + U_{1, i} + U_{2, i} X_{i, t} + E_{i, t}.
+$$
+This model can be written in stacked form by letting $Y = [Y_{1, 1}, \dots, Y_{N, T}]^T$ and defining $X$ and $Z$
+accordingly. In particular, $Z \in \mathbb{R}^{n \times 2N}$ with $n = NT$. The random effect $U_{1, i}$ is a random intercept shared by all observations with the same index $i$ and $U_{2, i}$ is a random slope. Let $\lambda_1$ and $\lambda_{2}$ be the standard deviations of $U_{1, i}$ and $U_{2, i}$, respectively. 
+
+Consider the null hypothesis $(\sigma, \lambda_1, \lambda_2) = (1, 0.5, 0)$. The following code generates one realization of the model, assuming the null hypothesis, and tests this hypothesis using the proposed test.
+
+```{r}
+set.seed(seed)
+  N <- 30
+  N_T <- 10
+  sigma_e <- 1
+  sigma_u1 <- 0.5
+  sigma_u2 <- 0
+  Beta <- c(1, 1)
+ 
+  # Generate data
+  X <- matrix(runif(N * N_T, -1, 2) , nrow = N, ncol = N_T)
+  U1 <- rnorm(N, sd = sigma_u1)
+  U2 <- rnorm(N, sd = sigma_u2)
+  E <- matrix(rnorm(N * N_T, sd = sigma_e), nrow = N, ncol = N_T)
+  Y <- X + 1 + E
+  for(ii in 1:n_i){
+    Y[ii, ] <- Y[ii, ] + U1[ii] + U2[ii] * X[ii, ]
+  }
+  D <- data.frame(c(t(Y)), c(t(X)))
+  D$time <- rep(1:n_t, n_i)
+  D$obs <- as.factor(rep(1:n_i, each = n_t))
+  names(D)[1:2] <- c("y", "x")
+  
+  # Fit model
+  fit <- lme4::lmer(y ~ x + (1|obs) + (0 + x|obs), data = D, REML = FALSE)
+  VC <- as.data.frame(lme4::VarCorr(fit))
+  # Fit null model and get lrt stat
+  Z_tall <- as.matrix(lme4::getME(fit, "Z"))
+  X_tall <- lme4::getME(fit, "X")
+  Lam_null <- diag(rep(c(sigma_u1, sigma_u2), each = n_i), n_i * 2)
+  Sigma_null <- diag(sigma_e^2, n_i * n_t) + Z_tall %*% Lam_null^2 %*% t(Z_tall)
+  R <- chol(Sigma_null)
+  y_null <- qr.solve(t(R), D$y)
+  X_null <- qr.solve(t(R), X_tall)
+  beta_null <- qr.coef(qr(X_null), y_null)
+  ll_null <- lmmstest::log_lik(y = D$y,
+                               X = X_tall,
+                               Z = Z_tall,
+                               Beta = beta_null,
+                               sigma = sigma_e,
+                               lambda = c(sigma_u1, sigma_u2),
+                               lam_idx = rep(1:2, each = n_i),
+                               diffs = 0)[[1]]
+  ll_alt <- lmmstest::log_lik(y = D$y,
+                               X = X_tall,
+                               Z = Z_tall,
+                               Beta = unname(fixef(fit)),
+                               sigma = VC[3, 5],
+                               lambda = VC[1:2, 5],
+                               lam_idx = rep(1:2, each = n_i),
+                               diffs = 0)[[1]]
+  lrt_stat <- 2 * (ll_alt - ll_null)
+  lrt_p_val <- pchisq(lrt_stat, df = 3, lower.tail = FALSE)
+  
+  # Wald test
+  finf <- lmmstest::fish_inf(y = D$y,
+                      X = X_tall,
+                      Z = Z_tall,
+                      Beta = beta_null,
+                      sigma = sigma_e,
+                      lambda = c(sigma_u1, sigma_u2),
+                      lam_idx = rep(1:2, each = n_i))
+  e <- VC[c(3, 1, 2), 5] - c(sigma_e, sigma_u1, sigma_u2)
+  wald_stat <- c(crossprod(e, finf[3:5, 3:5] %*% e))
+  wald_p_val <- pchisq(wald_stat, df = 3, lower.tail = FALSE)
+  
+  # Score test for random effects
+  c(lmmstest::score_test(
+    y = D$y,
+    X = X_tall,
+    Z = Z_tall,
+    Beta = unname(fixef(fit)),
+    sigma = sigma_e,
+    lambda = c(sigma_u1, sigma_u2),
+    lam_idx = rep(1:2, each = n_i),
+    test_idx = 2 + 1:3 # All variance parameters
+  ),
+```
