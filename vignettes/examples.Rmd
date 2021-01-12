@@ -77,7 +77,7 @@ N <- 30
 N_T <- 10
 n <- N * N_T
 
-# True parameters 
+# True parameters
 sigma <- 1
 lambda <- c(0.5, 0)
 Beta <- c(1, 1)
@@ -120,7 +120,7 @@ Beta_null <- c(qr.solve(crossprod(X, qr.solve(Sigma_null, X)),
                       crossprod(X, qr.solve(Sigma_null, ex_data$y))))
 Beta_null
 
-# Compute modified score test statistic for elements 3:5 of theta = 
+# Compute modified score test statistic for elements 3:5 of theta =
 # c(Beta, sigma, lambda[1], lambda_2), i.e. for (sigma, lambda[1], lambda_2).
 # The supplied arguments for  (sigma, lambda[1], lambda_2) are the true values,
 # so the null hypothesis is true.
@@ -131,9 +131,5 @@ lmmstest::score_test(y = ex_data$y,
                      sigma = sigma,
                      lambda =lambda,
                      lam_idx = lam_idx,
-                     test_idx = 3:5) 
+                     test_idx = 3:5)
 ```
-
-# Comparison to common test statistics
-
-
