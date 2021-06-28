@@ -92,3 +92,5 @@ fish_inf <- function(y, X, Z, Beta, sigma, lambda, lam_idx)
   diag(scale_vec, length(scale_vec)) %*% out[[3]] %*% diag(scale_vec,
   length(scale_vec))
 }
+
+

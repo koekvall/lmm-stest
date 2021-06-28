@@ -15,11 +15,11 @@ element in y.}
 \item{Z}{A design matrix for the random effects whose i:th row corresponds
 to the i:th element in y.}
 
-\item{Beta}{A vector of regression coefficients of length ncol(X)}
+\item{Beta}{A vector of regression coefficients of length ncol(X).}
 
 \item{sigma}{The standard deviation of the error term.}
 
-\item{lambda}{A vector of scale parameters (standard deviations) of the
+\item{lambda}{A vector of scale parameters (standard deviations) for the
 random effects.}
 
 \item{lam_idx}{A vector of length ncol(Z) whose j:th element indicates
@@ -52,7 +52,7 @@ lambda) are scaled by (1 / scale parameter) (see details).
   where the vector of random effects u is from a multivariate normal
   distribution with mean zero and diagonal covariance matrix. The j:th
   diagonal element of that covariance matrix -- the variance of the j:th
-  random effect -- is equal to lambda(lam_idx[j])^2.
+  random effect -- is equal to lambda[lam_idx[j]]^2.
  
   The elements of e are independent draws from a normal distribution
   with mean 0 and variance sigma^2.

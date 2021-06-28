@@ -4,7 +4,18 @@
 \alias{score_test}
 \title{Compute the (modified) score test statistic}
 \usage{
-score_test(y, X, Z, Beta, sigma, lambda, lam_idx, test_idx)
+score_test(
+  y,
+  X,
+  Z,
+  Beta,
+  sigma,
+  lambda,
+  lam_idx,
+  test_idx,
+  fix_idx,
+  efficient = TRUE
+)
 }
 \arguments{
 \item{y}{A vector of observed responses.}
@@ -27,6 +38,12 @@ which element of lambda scales the j:th random effect.}
 
 \item{test_idx}{A vector of integers indicating for which elements of
 theta = c(Beta, sigma, lambda) the test statistic is to be computed.}
+
+\item{fix_idx}{A vector of integeres indicating which elements of
+theta are treated as fixed and known}
+
+\item{efficient}{If TRUE, use efficient Fisher information (Schur complement)
+for tested parameters.}
 }
 \value{
 A vector with test statistic ("chi_sq"), degrees of freedom ("df"),
@@ -56,9 +73,7 @@ and p-value ("p_val").
   The test statistic is computed for theta[test_idx], where theta = c(Beta,
   sigma, lambda). Elements of theta not restricted under the null hypothesis
   should ideally be evaluated at their maximum likelihood estimates under the
-  null hypothesis, but the asymptotic distribution of the test statistic is
-  typically correct also if other square root n-consistent estimators are 
-  plugged in.
+  null hypothesis.
   
   When no standard deviation parameters are zero under the
   null hypothesis, the test statistic is the usual score test statistic

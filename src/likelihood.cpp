@@ -27,9 +27,10 @@ Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X,
   arma::mat V(dim, dim, arma::fill::zeros);
   arma::vec D(dim, arma::fill::zeros);
   arma::mat F = Z * arma::diagmat(arma::abs(Lam));
-  arma::svd_econ(U, D, V, F);
+  bool success = arma::svd_econ(U, D, V, F);
+  
   // Start computing quantities
-  if(n > q){
+  if((n > q) && success){
     // Common quantities
     arma::vec v = 1.0 / (arma::pow(D, -2.0) + std::pow(sigma, -2.0));
     arma::vec w;

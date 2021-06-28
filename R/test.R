@@ -22,6 +22,10 @@
 #'   which element of lambda scales the j:th random effect.
 #' @param test_idx A vector of integers indicating for which elements of
 #'   theta = c(Beta, sigma, lambda) the test statistic is to be computed.
+#' @param fix_idx A vector of integeres indicating which elements of
+#'   theta are treated as fixed and known
+#' @param efficient If TRUE, use efficient Fisher information (Schur complement)
+#'  for tested parameters. 
 #'
 #' @return A vector with test statistic ("chi_sq"), degrees of freedom ("df"),
 #' and p-value ("p_val").
@@ -39,9 +43,7 @@
 #'   The test statistic is computed for theta[test_idx], where theta = c(Beta,
 #'   sigma, lambda). Elements of theta not restricted under the null hypothesis
 #'   should ideally be evaluated at their maximum likelihood estimates under the
-#'   null hypothesis, but the asymptotic distribution of the test statistic is
-#'   typically correct also if other square root n-consistent estimators are 
-#'   plugged in.
+#'   null hypothesis.
 #'   
 #'   When no standard deviation parameters are zero under the
 #'   null hypothesis, the test statistic is the usual score test statistic
@@ -51,16 +53,26 @@
 #' @importFrom Rcpp sourceCpp
 #' @importFrom Rcpp evalCpp
 #' @export
-score_test <- function(y, X, Z, Beta, sigma, lambda, lam_idx, test_idx){
+score_test <- function(y, X, Z, Beta, sigma, lambda, lam_idx, test_idx,
+                       fix_idx = NULL, efficient = TRUE){
   components <- log_lik(y = y, X = X, Z = Z, Beta = Beta, sigma = sigma,
                         lambda = lambda, lam_idx = lam_idx, diffs = 2)
   theta <- c(Beta, sigma, lambda)
   m <- length(theta)
   stopifnot(is.atomic(test_idx), is.null(dim(test_idx)), all(test_idx %in% 1:m),
-            length(test_idx) == length(unique(test_idx)))
+            length(test_idx) == length(unique(test_idx)), all(fix_idx %in% 1:m),
+            length(fix_idx) == length(unique(fix_idx)),
+            all(!(fix_idx %in% test_idx)))
+  no_idx <- (1:m)[-unique(c(test_idx, fix_idx))]
   s <- components[[2]][test_idx]
-  I <- components[[3]][test_idx, test_idx]
-  test_stat <- sum(s * qr.solve(I, s))
+  I <- components[[3]]
+  I_block <- I[test_idx, test_idx]
+  if(efficient & (length(no_idx) > 0)){
+    I_block <- I_block -
+      I[test_idx, no_idx] %*% solve(I[no_idx, no_idx], I[no_idx, test_idx])
+  }
+
+  test_stat <- sum(s * qr.solve(I_block, s))
   df <- length(test_idx)
   p_val <- stats::pchisq(q = test_stat, df = df, lower.tail = FALSE)
   c("chi_sq" = test_stat, "df" = df, "p_val" = p_val)
