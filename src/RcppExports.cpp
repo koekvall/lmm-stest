@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // log_lik_rcpp
 Rcpp::List log_lik_rcpp(arma::vec y, const arma::mat X, const arma::mat Z, const arma::vec beta, const double sigma, const arma::vec lambda, const arma::uvec lam_idx, const uint diffs);
 RcppExport SEXP _lmmstest_log_lik_rcpp(SEXP ySEXP, SEXP XSEXP, SEXP ZSEXP, SEXP betaSEXP, SEXP sigmaSEXP, SEXP lambdaSEXP, SEXP lam_idxSEXP, SEXP diffsSEXP) {
